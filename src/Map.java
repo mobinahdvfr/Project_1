@@ -211,12 +211,52 @@ public class Map {
         map[oldRow][oldCol].setPower(null);
     }
 
-    public void attack (int x, int y){
-
+    public boolean attack (int aimRow, int aimCol){
+        return map[aimRow][aimCol].attack();
     }
 
-    public int calculateDistance (){
-        return 0;
+    public int calculateDistance (int row1, int col1, int row2, int col2){
+        int counter=0;
+        while ( !(row1 == row2 && col1==col2) ) {
+            if (row2 > row1 && col2 > col1) {
+                if (row1%2 == 1){
+                    col1++;
+                }
+                row1++;
+                counter++;
+            } else if (row2>row1 && col2==col1){
+                row1++;
+                counter++;
+            } else if (row2==row1 && col2>col1){
+                col1++;
+                counter++;
+            } else if (row2 < row1 && col2 < col1){
+                if (row1%2 == 0){
+                    col1--;
+                }
+                row1--;
+                counter++;
+            } else if (row2 > row1){
+                if (row1%2 == 0){
+                    col1--;
+                }
+                row1++;
+                counter++;
+            } else if (row2 < row1 && col2 > col1){
+                if (row1%2 == 1){
+                    col1++;
+                }
+                row1--;
+                counter++;
+            } else if (row2<row1){
+                row1--;
+                counter++;
+            } else {
+                col1--;
+                counter++;
+            }
+        }
+        return counter;
     }
 
     public void printMap (){
@@ -239,5 +279,21 @@ public class Map {
             System.out.println();
         }
     }
+
+    public int whichTeam (int row, int col){
+        if (map[row][col].getPower() != null)
+            return map[row][col].getPower().getWhichTeam();
+        else
+            return 0;
+    }
+
+    public boolean isEmpty (int row, int col){
+        return map[row][col].getPower() == null;
+    }
+
+    public Power getPower (int row, int col){
+        return map[row][col].getPower();
+    }
+
 
 }

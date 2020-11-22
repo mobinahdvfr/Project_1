@@ -34,6 +34,14 @@ public class Hexagon {
         }
     }
 
+    public boolean attack (){
+        powerNum --;
+        if (powerNum == 0) {
+            power = null;
+            return true;
+        } else
+            return false;
+    }
 
     public Power getPower (){
         return power;
@@ -42,7 +50,6 @@ public class Hexagon {
     public int getPowerNum (){
         return powerNum;
     }
-
 
     public void printHexagon (){
         if (power != null) {

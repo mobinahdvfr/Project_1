@@ -34,21 +34,23 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         while (!isGameOver()){
             showPage();
-
+            //choose car;2z d
+            scanPower();
             System.out.println("Enter row col");
             int a,b;
             a=scanner.nextInt();
             b=scanner.nextInt();
-            getMove(a,b);
+            scanDirection(a,b);
 
             if (teamTurn == 1)
                 teamTurn++;
             else
                 teamTurn--;
         }
+        map.printMap();
+        printWinner();
 
-
-        getMove(0,0);
+        scanDirection(0,0);
     showPage();
 
     }
@@ -72,13 +74,17 @@ public class Game {
     }
 
 
-    public void getMove (int row, int col){
+    public void scanDirection (int row, int col){
+        if (map.whichTeam(row,col) != teamTurn){
+            return;
+        }
         Scanner scanner = new Scanner(System.in);
         String read;
         read = scanner.nextLine();
         String[] moveStrings = read.split(" ");
         map.setRowAndCol(row, col);
         String dir;
+        int counter=0;
         for (String moveString : moveStrings) {
             for (int j = 0; j < Integer.parseInt(moveString.toCharArray()[0] + "" ); j++) {
                 dir = String.copyValueOf(moveString.toCharArray(), 1, moveString.toCharArray().length - 1);
@@ -88,13 +94,106 @@ public class Game {
                     return;
                 if (test == 1) {
                     if (teamTurn == 1)
-                        axis.addScore();
-                    else
-                        allied.addScore();
+                        addScore();
+                }
+                counter++;
+                if (map.getPower(row,col) instanceof Afoot && counter==2){
+                    map.getPower(row,col).setCanAttack(false);
+                    return;
+                } else if (map.getPower(row,col) instanceof Tank && counter==3){
+                    return;
+                } else if (map.getPower(row,col) instanceof Afoot && counter==1){
+                    map.getPower(row,col).setCanAttack(false);
                     return;
                 }
             }
         }
+    }
+
+    public void addScore (){
+        if (teamTurn == 1)
+            axis.addScore();
+        else
+            allied.addScore();
+    }
+
+    public void scanPower (){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the row and column:");
+        int row = scanner.nextInt();
+        int col = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("do you want to move it?");
+        String tmp = scanner.nextLine();
+        if (tmp.equals("yes"))
+            scanDirection(row-1,col-1);
+        System.out.println("do you want to attack?");
+        tmp = scanner.nextLine();
+        if (tmp.equals("yes"))
+            scanAim(row-1,col-1);
+
+
+    }
+
+    public void scanAim (int row,int col){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter aim's row and column:");
+        int aimRow = scanner.nextInt();
+        int aimCol = scanner.nextInt();
+        scanner.nextLine();
+        if (map.isEmpty(aimRow-1, aimCol-1))
+            return;
+        attack(row, col, aimRow, aimCol);
+
+    }
+
+    public void attack (int row , int col, int aimRow, int aimCol){
+        if (!map.getPower(row, col).getCanAttack()){
+            map.getPower(row,col).setCanAttack(true);
+            return;
+        }
+        int distance = map.calculateDistance(row, col, aimRow, aimCol);
+        if (map.getPower(row,col) instanceof Afoot){
+            if (distance > 3)
+                return;
+            attack(aimRow, aimCol, rollDice(4-distance));
+        } else if (map.getPower(row,col) instanceof Tank){
+            if (distance > 3)
+                return;
+            attack(aimRow, aimCol, rollDice(3));
+        } else if (map.getPower(row,col) instanceof Artillery){
+            if (distance > 6)
+                return;
+            if (distance == 1 || distance == 2)
+                attack(aimRow, aimCol, rollDice(3));
+            else if (distance == 3 || distance == 4)
+                attack(aimRow, aimCol, rollDice(4));
+            else if (distance == 5 || distance == 6)
+                attack(aimRow, aimCol, rollDice(1));
+        }
+    }
+
+    public void attack (int aimRow, int aimCol, int[] dice){
+        boolean bool = false;
+        int whichTeam = map.whichTeam(aimRow, aimCol);
+        for (int die : dice) {
+            if (map.getPower(aimRow,aimCol) == null){
+                return;
+            }
+            if (die == 1 || die == 6) {
+                if (map.getPower(aimRow, aimCol) instanceof Afoot) {
+                    bool = map.attack(aimRow, aimCol);
+                }
+            } else if (die == 2) {
+                if (map.getPower(aimRow, aimCol) instanceof Tank) {
+                    bool = map.attack(aimRow, aimCol);
+                }
+            } else if (die == 5) {
+                bool = map.attack(aimRow, aimCol);
+            }
+        }
+        if (bool && whichTeam!=teamTurn)
+            addScore();
 
     }
 
@@ -186,7 +285,15 @@ public class Game {
         System.out.println("4. About us.");
     }
 
-
+    public void printWinner(){
+        printScores();
+        if (axis.getScore() > 5){
+            System.out.print(nameAxis);
+        } else if (allied.getScore() > 5){
+            System.out.print(nameAllied);
+        }
+        System.out.println( " has won!");
+    }
 
 
 
