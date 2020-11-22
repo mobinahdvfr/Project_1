@@ -135,23 +135,22 @@ public class Map {
 
     /**
      *
-     * @param direction
+     * @param direction R L UR UL DR DL
      * @return -1 if moving is stopped. 0 if we can move more. 1 if one team got the special town of the other team
      */
     public int move (String direction){
-
 
         if (!(map[row][col].getPower().getCanMove() ) ){
             map[row][col].getPower().setCanMove(true);
             return -1;
         }
 
-        String dir = "";
-        int newRow = row;
-        int newCol = col;
-        dir = dir.copyValueOf(direction.toCharArray(), 1, direction.toCharArray().length-1);
-        for (int i = 0 ; i<direction.toCharArray()[0]; i++){
-            switch (dir){
+        int newRow;
+        int newCol;
+        for (int i = 0 ; i<1 ; i++){
+            newRow = row;
+            newCol = col;
+            switch (direction){
                 case "R":
                     newCol++;
                     break;
@@ -183,13 +182,14 @@ public class Map {
                     newRow++;
                     break;
             }
-            if (map[newRow][newCol].getPower() != null)
-                return -1;
             if (newCol<0 || newCol>12 || newRow<0 || newRow>8 )
+                return -1;
+            if (map[newRow][newCol].getPower() != null)
                 return -1;
             if (map[newRow][newCol].getType() == 'r')
                 return -1;
-            if ((map[row][col].getPower() instanceof Tank || map[row][col].getPower() instanceof Artillery) && map[newRow][newCol].getType() == 's')
+            if (( (map[row][col].getPower() instanceof Tank) || (map[row][col].getPower() instanceof Artillery) )
+                    && map[newRow][newCol].getType() == 's')
                 return -1;
             move(row, col, newRow, newCol);
             setRowAndCol(newRow, newCol);
@@ -206,9 +206,9 @@ public class Map {
     }
 
 
-    public void move (int row, int col, int newRow, int newCol){
-        map[newRow][newCol].setPower(map[row][col].getPower());
-        map[row][col].setPower(null);
+    public void move (int oldRow, int oldCol, int newRow, int newCol){
+        map[newRow][newCol].setPower(map[oldRow][oldCol].getPower());
+        map[oldRow][oldCol].setPower(null);
     }
 
     public void attack (int x, int y){

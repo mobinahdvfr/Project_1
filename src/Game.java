@@ -74,19 +74,25 @@ public class Game {
 
     public void getMove (int row, int col){
         Scanner scanner = new Scanner(System.in);
-        String[] moveStrings = scanner.nextLine().split(" ");
+        String read;
+        read = scanner.nextLine();
+        String[] moveStrings = read.split(" ");
         map.setRowAndCol(row, col);
-        for (int i = 0 ; i<moveStrings.length ; i++){
-            int test;
-            test = map.move(moveStrings[i]);
-            if (test == -1)
-                return;
-            if (test == 1){
-                if (teamTurn == 1)
-                    axis.addScore();
-                else
-                    allied.addScore();
-                return;
+        String dir;
+        for (String moveString : moveStrings) {
+            for (int j = 0; j < Integer.parseInt(moveString.toCharArray()[0] + "" ); j++) {
+                dir = String.copyValueOf(moveString.toCharArray(), 1, moveString.toCharArray().length - 1);
+                int test;
+                test = map.move(dir);
+                if (test == -1)
+                    return;
+                if (test == 1) {
+                    if (teamTurn == 1)
+                        axis.addScore();
+                    else
+                        allied.addScore();
+                    return;
+                }
             }
         }
 
