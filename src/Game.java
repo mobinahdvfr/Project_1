@@ -2,6 +2,11 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * handles our game
+ * @author Mobina Hadavifar
+ * @version 1.0
+ */
 public class Game {
 
     private Map map;
@@ -14,8 +19,9 @@ public class Game {
     private Card[] cards;
     private int[] cardsNum;
 
-
-
+    /**
+     * makes a new game
+     */
     public Game (){
         map = new Map();
         axis = new Axis();
@@ -29,6 +35,9 @@ public class Game {
         allied.addCard(shuffleCards(4));
     }
 
+    /**
+     * handles the playing
+     */
     public void play (){
         setNames();
         Scanner scanner = new Scanner(System.in);
@@ -45,7 +54,6 @@ public class Game {
                 scanPower(p);
             }
 
-
             if (teamTurn == 1)
                 teamTurn++;
             else
@@ -54,20 +62,29 @@ public class Game {
         map.printMap();
         printWinner();
 
-
     }
 
-    public boolean isGameOver (){
-        return axis.getScore() == 6 || allied.getScore() == 6;
+    /**
+     * checks if the game is over or not
+     * @return true if it is and false if not
+     */
+    private boolean isGameOver (){
+        return axis.getScore() == 1 || allied.getScore() == 1 ;
     }
 
+    /**
+     * it makes game's list of cards
+     */
     private void setCards(){
         for (int i = 0 ; i<5 ; i++){
             cards[i] = new Card(i+1);
         }
     }
 
-    public void setNames (){
+    /**
+     * it sets the tams names
+     */
+    private void setNames (){
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Axis team's name : ");
         nameAxis = scanner.next();
@@ -75,8 +92,12 @@ public class Game {
         nameAllied = scanner.next();
     }
 
-
-    public void scanDirection (int row, int col){
+    /**
+     * it reads the direction from user
+     * @param row row of the force
+     * @param col column of the force
+     */
+    private void scanDirection (int row, int col){
         System.out.println("Enter the move directions.");
         if (map.whichTeam(row,col) != teamTurn){
             return;
@@ -122,7 +143,10 @@ public class Game {
         }
     }
 
-    public void scanCard (){
+    /**
+     * it scans a card from user
+     */
+    private void scanCard (){
         System.out.println("Which card will you choose?");
         Scanner scanner = new Scanner(System.in);
         String cardString = scanner.nextLine();
@@ -148,7 +172,11 @@ public class Game {
         getTeamTurn().addCard(shuffleCards(1));
     }
 
-    public Team getTeamTurn (){
+    /**
+     * checks which team's turn it is
+     * @return the team which it's its turn to play
+     */
+    private Team getTeamTurn (){
         if (teamTurn == 1)
             return axis;
         else if (teamTurn == 2)
@@ -156,14 +184,22 @@ public class Game {
         return null;
     }
 
-    public void addScore (){
+    /**
+     * adds a score to the current playing team
+     */
+    private void addScore (){
         if (teamTurn == 1)
             axis.addScore();
         else
             allied.addScore();
     }
 
-    public Power scanPower (Power p){
+    /**
+     * it reads the current team's force location from user
+     * @param p if it isn't null, the chosen force must be the same type as its type
+     * @return the power user has chosen
+     */
+    private Power scanPower (Power p){
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the row and column:");
@@ -171,7 +207,9 @@ public class Game {
         int col = scanner.nextInt();
         if (map.getPower(row-1, col-1) == null)
             return null;
-
+        if (map.getPower(row-1, col-1).getWhichTeam() != teamTurn){
+            return null;
+        }
 
         if (p != null) {
             if (!((p instanceof Afoot && map.getPower(row - 1, col - 1) instanceof Afoot)
@@ -187,16 +225,28 @@ public class Game {
         String tmp = scanner.nextLine();
         if (tmp.equals("yes"))
             scanDirection(row-1,col-1);
+        if (!map.getPower(map.getRowAndCol()[0], map.getRowAndCol()[1]).getCanAttack()){
+            map.getPower(map.getRowAndCol()[0], map.getRowAndCol()[1]).setCanAttack(true);
+            return map.getPower(map.getRowAndCol()[0], map.getRowAndCol()[1]);
+        }
         System.out.println("do you want to attack?");
         tmp = scanner.nextLine();
         if (tmp.equals("yes"))
-            scanAim(row-1,col-1);
+            scanAim(map.getRowAndCol()[0], map.getRowAndCol()[1]);
 
-        return map.getPower(row-1, col-1);
+        return map.getPower(map.getRowAndCol()[0], map.getRowAndCol()[1]);
     }
 
-
-    public void scanAim (int row,int col){
+    /**
+     * it reads the location to be attacked (if possible)
+     * @param row row of the force
+     * @param col column of the force
+     */
+    private void scanAim (int row,int col){
+        if (!map.getPower(row, col).getCanAttack()){
+            map.getPower(row,col).setCanAttack(true);
+            return;
+        }
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter aim's row and column:");
         int aimRow = scanner.nextInt();
@@ -208,11 +258,15 @@ public class Game {
 
     }
 
-    public void attack (int row , int col, int aimRow, int aimCol){
-        if (!map.getPower(row, col).getCanAttack()){
-            map.getPower(row,col).setCanAttack(true);
-            return;
-        }
+    /**
+     * attacks if the conditions are achieved
+     * @param row row of user's force
+     * @param col column of user's force
+     * @param aimRow row of enemy's force
+     * @param aimCol column of enemy's force
+     */
+    private void attack (int row , int col, int aimRow, int aimCol){
+
         int distance = map.calculateDistance(row, col, aimRow, aimCol);
         if (map.getPower(row,col) instanceof Afoot){
             if (distance > 3)
@@ -234,7 +288,13 @@ public class Game {
         }
     }
 
-    public void attack (int aimRow, int aimCol, int[] dice){
+    /**
+     * attacks
+     * @param aimRow row of enemy's force
+     * @param aimCol column of enemy's force
+     * @param dice dice numbers
+     */
+    private void attack (int aimRow, int aimCol, int[] dice){
         boolean bool = false;
         int whichTeam = map.whichTeam(aimRow, aimCol);
         for (int die : dice) {
@@ -252,13 +312,15 @@ public class Game {
             } else if (die == 5) {
                 bool = map.attack(aimRow, aimCol);
             }
+            if (bool && whichTeam!=teamTurn)
+                addScore();
         }
-        if (bool && whichTeam!=teamTurn)
-            addScore();
-
     }
 
-    public void showPage (){
+    /**
+     * prints the page of game
+     */
+    private void showPage (){
         map.printMap();
         printScores();
         if (teamTurn == 1) {
@@ -270,7 +332,12 @@ public class Game {
         }
     }
 
-    public ArrayList<Card> shuffleCards (int n){
+    /**
+     * choose random cards from our cards list
+     * @param n number of cards we want
+     * @return a list of cards
+     */
+    private ArrayList<Card> shuffleCards (int n){
         Random random = new Random();
         int i =0;
         int tmp;
@@ -289,10 +356,17 @@ public class Game {
         return arrayList;
     }
 
+    /**
+     * sets the number of each type of cards
+     */
     private void setCardsNum (){
         cardsNum = new int[]{6,13,10,6,5};
     }
 
+    /**
+     * checks if the cards are empty
+     * @return true if it is
+     */
     private boolean isEmpty(){
         for (int i = 0 ; i<5 ; i++){
             if (cardsNum[i] != 0)
@@ -301,31 +375,40 @@ public class Game {
         return true;
     }
 
-    public int[] rollDice (int n){
+    /**
+     * rolls dice
+     * @param n number of dice we want to roll
+     * @return an array of numbers
+     */
+    private int[] rollDice (int n){
         int[] array = new int[n];
         Random random = new Random();
         for (int i = 0 ; i<n ; i++){
             switch (i){
-                case 1:
+                case 0:
                     System.out.print("first ");
                     break;
-                case 2:
+                case 1:
                     System.out.print("; second ");
                     break;
-                case 3:
+                case 2:
                     System.out.print("; third ");
                     break;
-                case 4:
+                case 3:
                     System.out.print("; forth ");
                     break;
             }
-            array[i] = random.nextInt(6);
+            array[i] = random.nextInt(6)+1;
             System.out.print("dice: " + array[i]);
         }
+        System.out.println();
         return array;
     }
 
-    public void printScores (){
+    /**
+     * prints the scores
+     */
+    private void printScores (){
         String BLUE = "\u001B[34m";
         String RESET = "\u001B[0m";
         System.out.print(BLUE);
@@ -338,6 +421,9 @@ public class Game {
         System.out.print(RESET);
     }
 
+    /**
+     * prints the menu
+     */
     public void printMenu (){
         System.out.println("1. Start the game.");
         System.out.println("2. Reenter the teams names.");
@@ -345,6 +431,9 @@ public class Game {
         System.out.println("4. About us.");
     }
 
+    /**
+     * prints the winner
+     */
     public void printWinner(){
         printScores();
         if (axis.getScore() > 5){

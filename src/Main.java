@@ -1,5 +1,13 @@
+/**
+ * keeps the main method
+ * @author Mobina Hadadvifar
+ * @version 1.0
+ */
 public class Main {
 
+    /**
+     * the program starts from here
+     */
     public static void main(String[] args){
 
 //        Map map = new Map();
@@ -11,13 +19,15 @@ public class Main {
 //        map.printMap();
 
         Game game = new Game();
+        game.play();
+
+
 //        game.showPage();
 //        int[] array = new int[] {1,2,5};
 //        game.attack(7, 9 , array );
 //        game.getMove(7,9);
 //        game.showPage();
 
-        game.play();
 //        Card card = new Card(4);
 //        card.printCard();
 
