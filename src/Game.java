@@ -30,7 +30,7 @@ public class Game {
     }
 
     public void play (){
-//        setNames();
+        setNames();
         Scanner scanner = new Scanner(System.in);
         while (!isGameOver()){
             showPage();
@@ -77,8 +77,17 @@ public class Game {
 
 
     public void scanDirection (int row, int col){
+        System.out.println("Enter the move directions.");
         if (map.whichTeam(row,col) != teamTurn){
             return;
+        }
+        String type = "";
+        if (map.getPower(row,col) instanceof Afoot){
+            type = "Afoot";
+        } else if (map.getPower(row,col) instanceof Tank){
+            type = "Tank";
+        } else if (map.getPower(row,col) instanceof Artillery){
+            type = "Artillery";
         }
         Scanner scanner = new Scanner(System.in);
         String read;
@@ -95,17 +104,18 @@ public class Game {
                 if (test == -1)
                     return;
                 if (test == 1) {
-                    if (teamTurn == 1)
-                        addScore();
+                    addScore();
+                    return;
                 }
                 counter++;
-                if (map.getPower(row,col) instanceof Afoot && counter==2){
-                    map.getPower(row,col).setCanAttack(false);
+                //**********************************************************************
+                if (type.equals("Afoot") && counter==2){
+                    map.getPower(map.getRowAndCol()[0], map.getRowAndCol()[1]).setCanAttack(false);
                     return;
-                } else if (map.getPower(row,col) instanceof Tank && counter==3){
+                } else if (type.equals("Tank") && counter==3){
                     return;
-                } else if (map.getPower(row,col) instanceof Afoot && counter==1){
-                    map.getPower(row,col).setCanAttack(false);
+                } else if (type.equals("Artillery") && counter==1){
+                    map.getPower(map.getRowAndCol()[0], map.getRowAndCol()[1]).setCanAttack(false);
                     return;
                 }
             }
@@ -194,7 +204,7 @@ public class Game {
         scanner.nextLine();
         if (map.isEmpty(aimRow-1, aimCol-1))
             return;
-        attack(row, col, aimRow, aimCol);
+        attack(row, col, aimRow-1, aimCol-1);
 
     }
 

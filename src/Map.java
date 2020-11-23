@@ -24,6 +24,11 @@ public class Map {
         this.col = col;
     }
 
+    public int[] getRowAndCol (){
+        int[] a = new int[] {row, col};
+        return a;
+    }
+
     private void setNormals (){
         for (int i =0 ; i<9 ; i++){
             for (int j = 0 ; j<13 ; j++){
