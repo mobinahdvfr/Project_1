@@ -34,13 +34,17 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         while (!isGameOver()){
             showPage();
-            //choose car;2z d
-            scanPower();
-            System.out.println("Enter row col");
-            int a,b;
-            a=scanner.nextInt();
-            b=scanner.nextInt();
-            scanDirection(a,b);
+            scanCard();
+            if (tmpCard.getType()<5) {
+                for (int i = 0; i < tmpCard.getType(); i++) {
+                    scanPower(null);
+                }
+            } else if (tmpCard.getType() == 5){
+                Power p = scanPower(null);
+                scanPower(p);
+                scanPower(p);
+            }
+
 
             if (teamTurn == 1)
                 teamTurn++;
@@ -50,8 +54,6 @@ public class Game {
         map.printMap();
         printWinner();
 
-        scanDirection(0,0);
-    showPage();
 
     }
 
@@ -110,6 +112,40 @@ public class Game {
         }
     }
 
+    public void scanCard (){
+        System.out.println("Which card will you choose?");
+        Scanner scanner = new Scanner(System.in);
+        String cardString = scanner.nextLine();
+        cardString = cardString.split(" ")[1];
+        switch (cardString){
+            case "1":
+                tmpCard=new Card(1);
+                break;
+            case "2":
+                tmpCard=new Card(2);
+                break;
+            case "3":
+                tmpCard=new Card(3);
+                break;
+            case "4":
+                tmpCard=new Card(4);
+                break;
+            case "3*":
+                tmpCard=new Card(5);
+                break;
+        }
+        getTeamTurn().removeCard(tmpCard);
+        getTeamTurn().addCard(shuffleCards(1));
+    }
+
+    public Team getTeamTurn (){
+        if (teamTurn == 1)
+            return axis;
+        else if (teamTurn == 2)
+            return allied;
+        return null;
+    }
+
     public void addScore (){
         if (teamTurn == 1)
             axis.addScore();
@@ -117,11 +153,25 @@ public class Game {
             allied.addScore();
     }
 
-    public void scanPower (){
+    public Power scanPower (Power p){
+
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the row and column:");
         int row = scanner.nextInt();
         int col = scanner.nextInt();
+        if (map.getPower(row-1, col-1) == null)
+            return null;
+
+
+        if (p != null) {
+            if (!((p instanceof Afoot && map.getPower(row - 1, col - 1) instanceof Afoot)
+                    || (p instanceof Tank && map.getPower(row - 1, col - 1) instanceof Tank)
+                    || (p instanceof Artillery && map.getPower(row - 1, col - 1) instanceof Artillery))) {
+                return null;
+            }
+        }
+
+
         scanner.nextLine();
         System.out.println("do you want to move it?");
         String tmp = scanner.nextLine();
@@ -132,8 +182,9 @@ public class Game {
         if (tmp.equals("yes"))
             scanAim(row-1,col-1);
 
-
+        return map.getPower(row-1, col-1);
     }
+
 
     public void scanAim (int row,int col){
         Scanner scanner = new Scanner(System.in);
@@ -207,7 +258,6 @@ public class Game {
             System.out.println("It's Allied's turn.");
             allied.printCards();
         }
-        System.out.println("Which card will you choose?");
     }
 
     public ArrayList<Card> shuffleCards (int n){

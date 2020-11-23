@@ -9,6 +9,10 @@ public class Card {
         setTypeStr(type);
     }
 
+    public int getType (){
+        return type;
+    }
+
     private void setTypeStr (int type){
         switch (type){
             case 1:
